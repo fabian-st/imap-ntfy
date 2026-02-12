@@ -236,9 +236,10 @@ class IMAPNtfyBridge:
                     # Extract just the email if no name found
                     email = from_value[open_bracket_idx + 1:close_bracket_idx].strip()
                     # If extracted email is empty (after stripping), fall back to original value
+                    # Note: strip() already removed any whitespace, so email is either empty or has content
                     if email:
                         return email
-                    # Parsing failed, return original value
+                    # Parsing failed (empty brackets), return original value
                     return from_value
                 
                 # Check for format: email (Name) without brackets
