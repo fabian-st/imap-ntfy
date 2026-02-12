@@ -39,6 +39,7 @@ Configure via environment variables in `.env` file.
 - `CHECK_INTERVAL` - Check interval in seconds (default: `60`)
 - `NTFY_TITLE` - Notification title
 - `NTFY_ICON` - Notification icon URL
+- `NTFY_PRIORITY` - Priority level 1-5 (default: `3`)
 - `DATABASE_URL` - Database connection (default: `sqlite:///messages.db`)
 
 See `.env.example` for more details.
