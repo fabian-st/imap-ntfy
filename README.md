@@ -38,7 +38,7 @@ Configure via environment variables in `.env` file.
 - `IMAP_FOLDERS` - Folders to monitor (default: `INBOX`)
 - `CHECK_INTERVAL` - Check interval in seconds (default: `300`)
 - `NTFY_TITLE` - Notification title
-- `NTFY_ICON` - Notification icon URL
+- `NTFY_ICON` - Notification icon URL (default: `envelope`)
 - `NTFY_PRIORITY` - Priority level 1-5 (default: `3`)
 - `DATABASE_URL` - Database connection (default: `sqlite:///messages.db`)
 
@@ -60,16 +60,36 @@ IMAP_USER=your-email@gmail.com
 IMAP_PASS=your-app-password  # Use App Password, not regular password
 ```
 
-**Outlook/Office 365:**
-```bash
-IMAP_HOST=outlook.office365.com
-IMAP_USER=your-email@outlook.com
-IMAP_PASS=your-password
-```
+**ProtonMail Bridge:**
+```yaml
+services:
+  protonmail-bridge:
+    image: shenxn/protonmail-bridge:latest
+    container_name: protonmail-bridge
+    restart: unless-stopped
+    volumes:
+      - protonmail_bridge:/root
 
-**Multiple Folders:**
-```bash
-IMAP_FOLDERS=INBOX,Spam
+  imap-ntfy:
+    image: quay.io/fabian-st/imap-ntfy:latest
+    container_name: protonmail-ntfy
+    restart: unless-stopped
+    depends_on:
+      - protonmail-bridge
+    volumes:
+      - protonmail_ntfy:/data
+    environment:
+      - IMAP_HOST=protonmail-bridge
+      - IMAP_PORT=143
+      - IMAP_SSL=false
+      - IMAP_USER=user@proton.me
+      - IMAP_PASS=secretpassword
+      - NTFY_TOPIC=https://ntfy.sh/mytopic
+      - IMAP_FOLDERS=INBOX,Folders/Important
+
+volumes:
+  protonmail_bridge:
+  protonmail_ntfy:
 ```
 
 ## License
