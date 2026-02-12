@@ -6,7 +6,7 @@ import time
 from imapclient import IMAPClient
 from dotenv import load_dotenv
 from database import Database
-from ntfy import NtfyNotifier
+from ntfy import NtfyNotifier, MAX_LOG_SUBJECT_LENGTH
 
 # Configure logging
 logging.basicConfig(
@@ -35,6 +35,7 @@ class IMAPNtfyBridge:
         
         # Polling Configuration
         self.check_interval = int(os.getenv('CHECK_INTERVAL', '60'))
+        self.batch_size = int(os.getenv('BATCH_SIZE', '50'))
         
         # NTFY Configuration
         self.ntfy_topic = os.getenv('NTFY_TOPIC')
@@ -104,10 +105,9 @@ class IMAPNtfyBridge:
                 return
             
             # Process messages in batches to avoid memory issues
-            batch_size = 50
-            for i in range(0, len(messages), batch_size):
-                batch = messages[i:i+batch_size]
-                logger.debug(f"Processing batch {i//batch_size + 1}: {len(batch)} messages")
+            for i in range(0, len(messages), self.batch_size):
+                batch = messages[i:i+self.batch_size]
+                logger.debug(f"Processing batch {i//self.batch_size + 1}: {len(batch)} messages")
                 
                 # Fetch message data for this batch
                 message_data = client.fetch(batch, ['RFC822.HEADER'])
@@ -115,7 +115,12 @@ class IMAPNtfyBridge:
                 for msg_id, data in message_data.items():
                     try:
                         # Get the Message-ID from headers
-                        header = data[b'RFC822.HEADER'].decode('utf-8', errors='ignore')
+                        try:
+                            header = data[b'RFC822.HEADER'].decode('utf-8', errors='replace')
+                        except UnicodeDecodeError as e:
+                            logger.warning(f"Failed to decode header for message {msg_id}: {e}")
+                            continue
+                        
                         message_id = self._extract_message_id(header)
                         
                         if not message_id:
@@ -132,11 +137,11 @@ class IMAPNtfyBridge:
                         
                         # On first run, just mark as processed without sending notification
                         if self.is_first_run:
-                            logger.info(f"First run: marking existing message as processed: {subject[:50]}...")
+                            logger.info(f"First run: marking existing message as processed: {subject[:MAX_LOG_SUBJECT_LENGTH]}...")
                             self.database.mark_as_processed(message_id)
                         else:
                             # Send notification for new message
-                            logger.info(f"New unread message: {subject[:50]}...")
+                            logger.info(f"New unread message: {subject[:MAX_LOG_SUBJECT_LENGTH]}...")
                             if self.notifier.send_notification(subject):
                                 self.database.mark_as_processed(message_id)
                             else:

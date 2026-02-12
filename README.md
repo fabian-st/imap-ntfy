@@ -115,6 +115,7 @@ All configuration is done via environment variables. You can set them in a `.env
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `CHECK_INTERVAL` | No | `60` | Interval in seconds between IMAP checks |
+| `BATCH_SIZE` | No | `50` | Number of messages to process in each batch (reduces memory usage) |
 
 ### Database Settings
 

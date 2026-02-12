@@ -4,6 +4,9 @@ import requests
 
 logger = logging.getLogger(__name__)
 
+# Maximum length of subject to show in logs
+MAX_LOG_SUBJECT_LENGTH = 50
+
 
 class NtfyNotifier:
     """Handler for sending notifications to NTFY."""
@@ -47,7 +50,7 @@ class NtfyNotifier:
             )
             
             if response.status_code == 200:
-                logger.info(f"Notification sent: {subject[:50]}...")
+                logger.info(f"Notification sent: {subject[:MAX_LOG_SUBJECT_LENGTH]}...")
                 return True
             else:
                 logger.error(f"Failed to send notification: {response.status_code}")

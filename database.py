@@ -15,7 +15,7 @@ class ProcessedMessage(Base):
     """Model for storing processed message IDs."""
     __tablename__ = 'processed_messages'
     
-    message_id = Column(String(255), primary_key=True)
+    message_id = Column(String(1024), primary_key=True)
     processed_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
