@@ -132,8 +132,9 @@ class IMAPNtfyBridge:
                             logger.debug(f"Message already processed: {message_id}")
                             continue
                         
-                        # Extract subject
+                        # Extract subject and sender
                         subject = self._extract_subject(header)
+                        sender = self._extract_sender(header)
                         
                         # On first run, just mark as processed without sending notification
                         if self.is_first_run:
@@ -141,8 +142,8 @@ class IMAPNtfyBridge:
                             self.database.mark_as_processed(message_id)
                         else:
                             # Send notification for new message
-                            logger.debug(f"New unread message: {subject[:MAX_LOG_SUBJECT_LENGTH]}")
-                            if self.notifier.send_notification(subject):
+                            logger.debug(f"New unread message from {sender}: {subject[:MAX_LOG_SUBJECT_LENGTH]}")
+                            if self.notifier.send_notification(subject, sender):
                                 self.database.mark_as_processed(message_id)
                             else:
                                 logger.error("Failed to send notification, will retry next time")
@@ -193,6 +194,29 @@ class IMAPNtfyBridge:
         if subject_lines:
             return ' '.join(subject_lines)
         return "No Subject"
+    
+    def _extract_sender(self, header):
+        """Extract sender name from email header.
+        
+        Args:
+            header: Email header string
+            
+        Returns:
+            Sender name or email address
+        """
+        for line in header.split('\n'):
+            if line.lower().startswith('from:'):
+                from_value = line.split(':', 1)[1].strip()
+                # Try to extract name from "Name <email>" format
+                if '<' in from_value and '>' in from_value:
+                    name = from_value.split('<')[0].strip()
+                    # Remove quotes if present
+                    name = name.strip('"\'')
+                    if name:
+                        return name
+                # If no name part, return the email address
+                return from_value
+        return "Unknown Sender"
     
     def run(self):
         """Run the main polling loop."""
