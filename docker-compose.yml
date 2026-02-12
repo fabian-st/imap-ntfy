@@ -1,6 +1,6 @@
 services:
   imap-ntfy:
-    build: .
+    image: quay.io/fabian-st/imap-ntfy
     container_name: imap-ntfy
     restart: unless-stopped
     env_file:
