@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  imap-ntfy:
+    build: .
+    container_name: imap-ntfy
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      # Mount volume for SQLite database persistence
+      - ./data:/data
+    environment:
+      # Override DATABASE_URL to use mounted volume
+      - DATABASE_URL=sqlite:////data/messages.db
