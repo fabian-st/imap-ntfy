@@ -46,11 +46,12 @@ class NtfyNotifier:
             logger.warning(f"Invalid priority {priority}, using default 3")
             return 3
     
-    def send_notification(self, subject):
+    def send_notification(self, subject, sender=None):
         """Send a notification to NTFY.
         
         Args:
             subject: The message subject to send
+            sender: The sender name/email (used as title if NTFY_TITLE is not set)
             
         Returns:
             True if notification was sent successfully, False otherwise
@@ -58,8 +59,11 @@ class NtfyNotifier:
         try:
             headers = {}
             
+            # Use sender as title if no explicit title is configured
             if self.title:
                 headers["Title"] = self.title
+            elif sender:
+                headers["Title"] = sender
             
             if self.icon:
                 headers["Tags"] = self.icon
