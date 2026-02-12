@@ -41,6 +41,7 @@ class IMAPNtfyBridge:
         self.ntfy_topic = os.getenv('NTFY_TOPIC')
         self.ntfy_title = os.getenv('NTFY_TITLE', '')
         self.ntfy_icon = os.getenv('NTFY_ICON', '')
+        self.ntfy_priority = int(os.getenv('NTFY_PRIORITY', '3'))
         
         # Database Configuration
         self.database_url = os.getenv('DATABASE_URL', 'sqlite:///messages.db')
@@ -50,7 +51,7 @@ class IMAPNtfyBridge:
         
         # Initialize components
         self.database = Database(self.database_url)
-        self.notifier = NtfyNotifier(self.ntfy_topic, self.ntfy_title, self.ntfy_icon)
+        self.notifier = NtfyNotifier(self.ntfy_topic, self.ntfy_title, self.ntfy_icon, self.ntfy_priority)
         self.is_first_run = self.database.is_empty()
         
         if self.is_first_run:
