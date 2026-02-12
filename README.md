@@ -28,13 +28,13 @@ Configure via environment variables in `.env` file.
 
 **Required:**
 - `IMAP_HOST` - IMAP server hostname
-- `IMAP_USERNAME` - IMAP username/email
-- `IMAP_PASSWORD` - IMAP password
+- `IMAP_USER` - IMAP username/email
+- `IMAP_PASS` - IMAP password
 - `NTFY_TOPIC` - Full NTFY topic URL (e.g., `https://ntfy.sh/mytopic`)
 
 **Optional:**
 - `IMAP_PORT` - IMAP port (default: `993`)
-- `IMAP_USE_SSL` - Use SSL/TLS (default: `true`)
+- `IMAP_SSL` - Use SSL/TLS (default: `true`)
 - `IMAP_FOLDERS` - Folders to monitor (default: `INBOX`)
 - `CHECK_INTERVAL` - Check interval in seconds (default: `60`)
 - `NTFY_TITLE` - Notification title
@@ -55,15 +55,15 @@ See `.env.example` for more details.
 **Gmail:**
 ```bash
 IMAP_HOST=imap.gmail.com
-IMAP_USERNAME=your-email@gmail.com
-IMAP_PASSWORD=your-app-password  # Use App Password, not regular password
+IMAP_USER=your-email@gmail.com
+IMAP_PASS=your-app-password  # Use App Password, not regular password
 ```
 
 **Outlook/Office 365:**
 ```bash
 IMAP_HOST=outlook.office365.com
-IMAP_USERNAME=your-email@outlook.com
-IMAP_PASSWORD=your-password
+IMAP_USER=your-email@outlook.com
+IMAP_PASS=your-password
 ```
 
 **Multiple Folders:**
