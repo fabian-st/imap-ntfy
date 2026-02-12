@@ -207,15 +207,38 @@ class IMAPNtfyBridge:
         for line in header.split('\n'):
             if line.lower().startswith('from:'):
                 from_value = line.split(':', 1)[1].strip()
+                
                 # Try to extract name from "Name <email>" format
                 if '<' in from_value and '>' in from_value:
-                    name = from_value.split('<')[0].strip()
-                    # Remove quotes if present
-                    name = name.strip('"\'')
-                    if name:
-                        return name
-                # If no name part, return the email address
+                    # Check if name is before the email (standard format)
+                    before_bracket = from_value.split('<')[0].strip()
+                    if before_bracket:
+                        # Remove quotes if present
+                        name = before_bracket.strip('"\'')
+                        if name:
+                            return name
+                    
+                    # Check if name is after email in parentheses: <email> (Name)
+                    after_bracket = from_value.split('>', 1)[1].strip()
+                    if after_bracket.startswith('(') and after_bracket.endswith(')'):
+                        name = after_bracket[1:-1].strip()
+                        if name:
+                            return name
+                    
+                    # Extract just the email if no name found
+                    email = from_value[from_value.index('<')+1:from_value.index('>')].strip()
+                    return email
+                
+                # Check for format: email (Name) without brackets
+                if '(' in from_value and ')' in from_value:
+                    parts = from_value.split('(', 1)
+                    name_part = parts[1].split(')', 1)[0].strip()
+                    if name_part:
+                        return name_part
+                
+                # If no special format, return the email address
                 return from_value
+        
         return "Unknown Sender"
     
     def run(self):
