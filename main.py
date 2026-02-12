@@ -40,7 +40,7 @@ class IMAPNtfyBridge:
         # NTFY Configuration
         self.ntfy_topic = os.getenv('NTFY_TOPIC')
         self.ntfy_title = os.getenv('NTFY_TITLE', '')
-        self.ntfy_icon = os.getenv('NTFY_ICON', '')
+        self.ntfy_icon = os.getenv('NTFY_ICON', 'envelope')
         self.ntfy_priority = int(os.getenv('NTFY_PRIORITY', '3'))
         
         # Database Configuration
