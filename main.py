@@ -208,6 +208,10 @@ class IMAPNtfyBridge:
             if line.lower().startswith('from:'):
                 from_value = line.split(':', 1)[1].strip()
                 
+                # If from_value is empty, return "Unknown Sender"
+                if not from_value:
+                    return "Unknown Sender"
+                
                 # Try to extract name from "Name <email>" format
                 open_bracket_idx = from_value.find('<')
                 # Find the closing bracket after the opening one
@@ -231,7 +235,11 @@ class IMAPNtfyBridge:
                     
                     # Extract just the email if no name found
                     email = from_value[open_bracket_idx + 1:close_bracket_idx].strip()
-                    return email
+                    # If extracted email is empty or whitespace, fall back to original value
+                    if email:
+                        return email
+                    # Parsing failed, return original value
+                    return from_value
                 
                 # Check for format: email (Name) without brackets
                 # Only apply this if '<' and '>' are not present (including malformed cases)
