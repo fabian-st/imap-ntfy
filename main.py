@@ -222,14 +222,14 @@ class IMAPNtfyBridge:
                             return name
                     
                     # Check if name is after email in parentheses: <email> (Name)
-                    content_after_email = from_value[close_bracket_idx+1:].strip()
+                    content_after_email = from_value[close_bracket_idx + 1:].strip()
                     if content_after_email.startswith('(') and content_after_email.endswith(')'):
                         name = content_after_email[1:-1].strip()
                         if name:
                             return name
                     
                     # Extract just the email if no name found
-                    email = from_value[open_bracket_idx+1:close_bracket_idx].strip()
+                    email = from_value[open_bracket_idx + 1:close_bracket_idx].strip()
                     return email
                 
                 # Check for format: email (Name) without brackets
@@ -237,7 +237,7 @@ class IMAPNtfyBridge:
                 close_paren_idx = from_value.find(')')
                 
                 if open_paren_idx != -1 and close_paren_idx != -1 and open_paren_idx < close_paren_idx:
-                    name_part = from_value[open_paren_idx+1:close_paren_idx].strip()
+                    name_part = from_value[open_paren_idx + 1:close_paren_idx].strip()
                     if name_part:
                         return name_part
                 
