@@ -115,11 +115,10 @@ class IMAPNtfyBridge:
                 for msg_id, data in message_data.items():
                     try:
                         # Get the Message-ID from headers
-                        try:
-                            header = data[b'RFC822.HEADER'].decode('utf-8', errors='replace')
-                        except UnicodeDecodeError as e:
-                            logger.warning(f"Failed to decode header for message {msg_id}: {e}")
-                            continue
+                        # Use errors='replace' to handle encoding issues gracefully
+                        header = data[b'RFC822.HEADER'].decode('utf-8', errors='replace')
+                        if '�' in header:
+                            logger.warning(f"Header for message {msg_id} contains invalid UTF-8 sequences")
                         
                         message_id = self._extract_message_id(header)
                         
