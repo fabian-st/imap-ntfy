@@ -3,7 +3,8 @@ import logging
 from sqlalchemy import create_engine, Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime
+from sqlalchemy.exc import IntegrityError
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ class ProcessedMessage(Base):
     __tablename__ = 'processed_messages'
     
     message_id = Column(String(255), primary_key=True)
-    processed_at = Column(DateTime, default=datetime.utcnow)
+    processed_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class Database:
@@ -53,11 +54,15 @@ class Database:
         Args:
             message_id: The message ID to mark as processed
         """
-        if not self.is_processed(message_id):
+        try:
             message = ProcessedMessage(message_id=message_id)
             self.session.add(message)
             self.session.commit()
             logger.debug(f"Marked message as processed: {message_id}")
+        except IntegrityError:
+            # Message already exists (duplicate), rollback and continue
+            self.session.rollback()
+            logger.debug(f"Message already processed: {message_id}")
     
     def is_empty(self):
         """Check if database is empty (first run).

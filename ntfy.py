@@ -42,7 +42,8 @@ class NtfyNotifier:
             response = requests.post(
                 self.topic_url,
                 data=subject.encode('utf-8'),
-                headers=headers
+                headers=headers,
+                timeout=10
             )
             
             if response.status_code == 200:

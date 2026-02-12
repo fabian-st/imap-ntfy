@@ -103,42 +103,48 @@ class IMAPNtfyBridge:
             if not messages:
                 return
             
-            # Fetch message data
-            message_data = client.fetch(messages, ['RFC822.HEADER'])
-            
-            for msg_id, data in message_data.items():
-                try:
-                    # Get the Message-ID from headers
-                    header = data[b'RFC822.HEADER'].decode('utf-8', errors='ignore')
-                    message_id = self._extract_message_id(header)
-                    
-                    if not message_id:
-                        logger.warning(f"Could not extract Message-ID for message {msg_id}")
-                        continue
-                    
-                    # Check if already processed
-                    if self.database.is_processed(message_id):
-                        logger.debug(f"Message already processed: {message_id}")
-                        continue
-                    
-                    # Extract subject
-                    subject = self._extract_subject(header)
-                    
-                    # On first run, just mark as processed without sending notification
-                    if self.is_first_run:
-                        logger.info(f"First run: marking existing message as processed: {subject[:50]}...")
-                        self.database.mark_as_processed(message_id)
-                    else:
-                        # Send notification for new message
-                        logger.info(f"New unread message: {subject[:50]}...")
-                        if self.notifier.send_notification(subject):
+            # Process messages in batches to avoid memory issues
+            batch_size = 50
+            for i in range(0, len(messages), batch_size):
+                batch = messages[i:i+batch_size]
+                logger.debug(f"Processing batch {i//batch_size + 1}: {len(batch)} messages")
+                
+                # Fetch message data for this batch
+                message_data = client.fetch(batch, ['RFC822.HEADER'])
+                
+                for msg_id, data in message_data.items():
+                    try:
+                        # Get the Message-ID from headers
+                        header = data[b'RFC822.HEADER'].decode('utf-8', errors='ignore')
+                        message_id = self._extract_message_id(header)
+                        
+                        if not message_id:
+                            logger.warning(f"Could not extract Message-ID for message {msg_id}")
+                            continue
+                        
+                        # Check if already processed
+                        if self.database.is_processed(message_id):
+                            logger.debug(f"Message already processed: {message_id}")
+                            continue
+                        
+                        # Extract subject
+                        subject = self._extract_subject(header)
+                        
+                        # On first run, just mark as processed without sending notification
+                        if self.is_first_run:
+                            logger.info(f"First run: marking existing message as processed: {subject[:50]}...")
                             self.database.mark_as_processed(message_id)
                         else:
-                            logger.error("Failed to send notification, will retry next time")
-                
-                except Exception as e:
-                    logger.error(f"Error processing message {msg_id}: {e}")
-                    continue
+                            # Send notification for new message
+                            logger.info(f"New unread message: {subject[:50]}...")
+                            if self.notifier.send_notification(subject):
+                                self.database.mark_as_processed(message_id)
+                            else:
+                                logger.error("Failed to send notification, will retry next time")
+                    
+                    except Exception as e:
+                        logger.error(f"Error processing message {msg_id}: {e}")
+                        continue
             
         except Exception as e:
             logger.error(f"Error processing folder {folder}: {e}")
