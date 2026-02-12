@@ -234,13 +234,14 @@ class IMAPNtfyBridge:
                 
                 # Check for format: email (Name) without brackets
                 # Only apply this if '<' and '>' are not present
-                open_paren_idx = from_value.find('(')
-                close_paren_idx = from_value.find(')')
-                
-                if open_paren_idx != -1 and close_paren_idx != -1 and open_paren_idx < close_paren_idx:
-                    name_part = from_value[open_paren_idx + 1:close_paren_idx].strip()
-                    if name_part:
-                        return name_part
+                if '<' not in from_value and '>' not in from_value:
+                    open_paren_idx = from_value.find('(')
+                    close_paren_idx = from_value.rfind(')')
+                    
+                    if open_paren_idx != -1 and close_paren_idx != -1 and open_paren_idx < close_paren_idx:
+                        name_part = from_value[open_paren_idx + 1:close_paren_idx].strip()
+                        if name_part:
+                            return name_part
                 
                 # If no special format, return the email address
                 return from_value
