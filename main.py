@@ -210,7 +210,7 @@ class IMAPNtfyBridge:
                 
                 # Try to extract name from "Name <email>" format
                 open_bracket_idx = from_value.find('<')
-                close_bracket_idx = from_value.find('>')
+                close_bracket_idx = from_value.rfind('>')
                 
                 if open_bracket_idx != -1 and close_bracket_idx != -1 and open_bracket_idx < close_bracket_idx:
                     # Check if name is before the email (standard format)
@@ -233,6 +233,7 @@ class IMAPNtfyBridge:
                     return email
                 
                 # Check for format: email (Name) without brackets
+                # Only apply this if '<' and '>' are not present
                 open_paren_idx = from_value.find('(')
                 close_paren_idx = from_value.find(')')
                 
