@@ -36,7 +36,7 @@ Configure via environment variables in `.env` file.
 - `IMAP_PORT` - IMAP port (default: `993`)
 - `IMAP_SSL` - Use SSL/TLS (default: `true`)
 - `IMAP_FOLDERS` - Folders to monitor (default: `INBOX`)
-- `CHECK_INTERVAL` - Check interval in seconds (default: `60`)
+- `CHECK_INTERVAL` - Check interval in seconds (default: `300`)
 - `NTFY_TITLE` - Notification title
 - `NTFY_ICON` - Notification icon URL
 - `NTFY_PRIORITY` - Priority level 1-5 (default: `3`)

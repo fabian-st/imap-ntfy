@@ -75,7 +75,7 @@ class NtfyNotifier:
             )
             
             if response.status_code == 200:
-                logger.info(f"Notification sent: {subject[:MAX_LOG_SUBJECT_LENGTH]}")
+                logger.debug(f"Notification sent: {subject[:MAX_LOG_SUBJECT_LENGTH]}")
                 return True
             else:
                 logger.error(f"Failed to send notification: {response.status_code}")

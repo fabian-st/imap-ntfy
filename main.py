@@ -34,7 +34,7 @@ class IMAPNtfyBridge:
         self.imap_folders = os.getenv('IMAP_FOLDERS', 'INBOX').split(',')
         
         # Polling Configuration
-        self.check_interval = int(os.getenv('CHECK_INTERVAL', '60'))
+        self.check_interval = int(os.getenv('CHECK_INTERVAL', '300'))
         self.batch_size = int(os.getenv('BATCH_SIZE', '50'))
         
         # NTFY Configuration
@@ -95,12 +95,12 @@ class IMAPNtfyBridge:
             # Strip whitespace from folder name
             folder = folder.strip()
             
-            logger.info(f"Processing folder: {folder}")
+            logger.debug(f"Processing folder: {folder}")
             client.select_folder(folder)
             
             # Search for unread messages
             messages = client.search(['UNSEEN'])
-            logger.info(f"Found {len(messages)} unread messages in {folder}")
+            logger.debug(f"Found {len(messages)} unread messages in {folder}")
             
             if not messages:
                 return
@@ -141,7 +141,7 @@ class IMAPNtfyBridge:
                             self.database.mark_as_processed(message_id)
                         else:
                             # Send notification for new message
-                            logger.info(f"New unread message: {subject[:MAX_LOG_SUBJECT_LENGTH]}")
+                            logger.debug(f"New unread message: {subject[:MAX_LOG_SUBJECT_LENGTH]}")
                             if self.notifier.send_notification(subject):
                                 self.database.mark_as_processed(message_id)
                             else:
