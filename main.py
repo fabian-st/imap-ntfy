@@ -28,9 +28,9 @@ class IMAPNtfyBridge:
         # IMAP Configuration
         self.imap_host = os.getenv('IMAP_HOST')
         self.imap_port = int(os.getenv('IMAP_PORT', '993'))
-        self.imap_username = os.getenv('IMAP_USERNAME')
-        self.imap_password = os.getenv('IMAP_PASSWORD')
-        self.imap_use_ssl = os.getenv('IMAP_USE_SSL', 'true').lower() == 'true'
+        self.imap_username = os.getenv('IMAP_USER')
+        self.imap_password = os.getenv('IMAP_PASS')
+        self.imap_use_ssl = os.getenv('IMAP_SSL', 'true').lower() == 'true'
         self.imap_folders = os.getenv('IMAP_FOLDERS', 'INBOX').split(',')
         
         # Polling Configuration
@@ -62,8 +62,8 @@ class IMAPNtfyBridge:
         """Validate required configuration parameters."""
         required = {
             'IMAP_HOST': self.imap_host,
-            'IMAP_USERNAME': self.imap_username,
-            'IMAP_PASSWORD': self.imap_password,
+            'IMAP_USER': self.imap_username,
+            'IMAP_PASS': self.imap_password,
             'NTFY_TOPIC': self.ntfy_topic,
         }
         
@@ -136,11 +136,11 @@ class IMAPNtfyBridge:
                         
                         # On first run, just mark as processed without sending notification
                         if self.is_first_run:
-                            logger.info(f"First run: marking existing message as processed: {subject[:MAX_LOG_SUBJECT_LENGTH]}...")
+                            logger.debug(f"First run: marking existing message as processed: {subject[:MAX_LOG_SUBJECT_LENGTH]}")
                             self.database.mark_as_processed(message_id)
                         else:
                             # Send notification for new message
-                            logger.info(f"New unread message: {subject[:MAX_LOG_SUBJECT_LENGTH]}...")
+                            logger.info(f"New unread message: {subject[:MAX_LOG_SUBJECT_LENGTH]}")
                             if self.notifier.send_notification(subject):
                                 self.database.mark_as_processed(message_id)
                             else:
@@ -213,15 +213,15 @@ class IMAPNtfyBridge:
                     logger.info("First run complete - will now send notifications for new messages")
                 
                 client.logout()
-                logger.info(f"Waiting {self.check_interval} seconds until next check...")
+                logger.info(f"Waiting {self.check_interval} seconds until next check")
                 time.sleep(self.check_interval)
                 
             except KeyboardInterrupt:
-                logger.info("Shutting down...")
+                logger.info("Shutting down")
                 break
             except Exception as e:
                 logger.error(f"Error in main loop: {e}")
-                logger.info(f"Retrying in {self.check_interval} seconds...")
+                logger.info(f"Retrying in {self.check_interval} seconds")
                 time.sleep(self.check_interval)
         
         self.database.close()
