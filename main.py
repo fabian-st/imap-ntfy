@@ -233,9 +233,11 @@ class IMAPNtfyBridge:
                     return email
                 
                 # Check for format: email (Name) without brackets
-                # Only apply this if '<' and '>' are not present
+                # Only apply this if '<' and '>' are not present (including malformed cases)
                 if '<' not in from_value and '>' not in from_value:
                     open_paren_idx = from_value.find('(')
+                    # Use rfind() for closing parenthesis to handle nested parentheses
+                    # e.g., "john@example.com (John (Johnny) Doe)"
                     close_paren_idx = from_value.rfind(')')
                     
                     if open_paren_idx != -1 and close_paren_idx != -1 and open_paren_idx < close_paren_idx:
