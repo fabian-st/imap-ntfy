@@ -1,4 +1,5 @@
 """Main application for IMAP to NTFY bridge."""
+import email.header
 import logging
 import os
 import sys
@@ -155,6 +156,20 @@ class IMAPNtfyBridge:
         except Exception as e:
             logger.error(f"Error processing folder {folder}: {e}")
     
+    def _decode_header_value(self, value):
+        """Decode a MIME-encoded header value (RFC 2047).
+        
+        Args:
+            value: Raw header value string, possibly MIME-encoded
+            
+        Returns:
+            Decoded string
+        """
+        try:
+            return str(email.header.make_header(email.header.decode_header(value)))
+        except Exception:
+            return value
+
     def _extract_message_id(self, header):
         """Extract Message-ID from email header.
         
@@ -192,7 +207,7 @@ class IMAPNtfyBridge:
                 break
         
         if subject_lines:
-            return ' '.join(subject_lines)
+            return self._decode_header_value(' '.join(subject_lines))
         return "No Subject"
     
     def _extract_sender(self, header):
@@ -206,7 +221,7 @@ class IMAPNtfyBridge:
         """
         for line in header.split('\n'):
             if line.lower().startswith('from:'):
-                from_value = line.split(':', 1)[1].strip()
+                from_value = self._decode_header_value(line.split(':', 1)[1].strip())
                 
                 # If from_value is empty, return "Unknown Sender"
                 if not from_value:
