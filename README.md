@@ -1,3 +1,5 @@
+[![Docker Repository on Quay](https://quay.io/repository/fabian-st/imap-ntfy/status "Docker Repository on Quay")](https://quay.io/repository/fabian-st/imap-ntfy)
+
 # imap-ntfy
 
 A lightweight Python service that monitors IMAP mailboxes and sends notifications for new unread messages via [NTFY](https://ntfy.sh).
