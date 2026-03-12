@@ -57,24 +57,25 @@ class NtfyNotifier:
             True if notification was sent successfully, False otherwise
         """
         try:
-            headers = {}
-            
+            # Use JSON body to correctly handle non-ASCII characters (e.g. umlauts)
+            # in the title field, which HTTP headers cannot transmit as UTF-8.
+            payload = {
+                "message": subject,
+                "priority": self.priority,
+            }
+
             # Use sender as title if no explicit title is configured
             if self.title:
-                headers["Title"] = self.title
+                payload["title"] = self.title
             elif sender:
-                headers["Title"] = sender
-            
+                payload["title"] = sender
+
             if self.icon:
-                headers["Tags"] = self.icon
-            
-            # Add priority header
-            headers["Priority"] = str(self.priority)
-            
+                payload["tags"] = [self.icon]
+
             response = requests.post(
                 self.topic_url,
-                data=subject.encode('utf-8'),
-                headers=headers,
+                json=payload,
                 timeout=10
             )
             
